@@ -35,7 +35,11 @@ function startBot() {
 
 // ====== EVENTLAR ======
 function setupEvents() {
-  bot.once('spawn', () => { console.log('✅ Serverga kirdi'); loggedIn = false })
+  bot.once('spawn', () => {
+    console.log('✅ Serverga kirdi')
+    loggedIn = false
+    monitorServerStatus() // Hubda qolmaslik uchun qo‘shildi
+  })
 
   bot.on('message', msg => {
     const text = msg.toString()
@@ -57,6 +61,21 @@ function setupEvents() {
   bot.on('kicked', reason => { console.log('❌ Kick:', JSON.stringify(reason)); reconnect() })
   bot.on('end', () => { console.log('⚠️ Ulanish uzildi'); reconnect() })
   bot.on('error', err => { console.log('⚠️ Error:', err.message) })
+}
+
+// ====== HUBDA QOLMASLIK FUNKSIYASI ======
+function monitorServerStatus() {
+  const interval = setInterval(() => {
+    if (!bot || !bot.entity) return
+    if (!loggedIn) return // login bo‘lishini kut
+
+    // Hubda turib qolsa avtomatik SMP va /warp afk
+    console.log('📍 SMP va /warp afk tekshirilmoqda...')
+    bot.chat('/server smp')
+    setTimeout(() => bot.chat('/warp afk'), 2000)
+    startAntiAfk()
+    clearInterval(interval)
+  }, 2000)
 }
 
 // ====== QAYTA ULANISH ======
