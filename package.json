@@ -1,17 +1,13 @@
 {
-  "dependencies": {
-    "mineflayer": "^4.33.0",
-    "node": "^25.0.0"
-  },
-  "name": "ggafk",
+  "name": "afkshardbot",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "dependencies": {
+    "express": "^4.22.1",
+    "mineflayer": "^4.17.0"
+  }
 }
