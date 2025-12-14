@@ -1,7 +1,7 @@
 const mineflayer = require('mineflayer')
 const express = require('express')
 
-// ====== WEB SERVICE ======
+// ===== WEB (Render / UptimeRobot) =====
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -11,24 +11,21 @@ app.get('/', (req, res) => {
   res.send(`
     <h2>🤖 AFK BOT ISHLAYAPTI</h2>
     <p>Status: ${botStatus}</p>
-    <p>Chat yozish: <code>/say?msg=SALOM</code></p>
+    <p>/say?msg=SALOM</p>
   `)
 })
 
 app.get('/say', (req, res) => {
-  const msg = req.query.msg
-  if (!msg) return res.send('❌ msg yozilmadi')
-  if (!bot) return res.send('❌ bot ulanmagan')
-
-  bot.chat(msg)
-  res.send('✅ Yuborildi: ' + msg)
+  if (!bot) return res.send('❌ bot yo‘q')
+  bot.chat(req.query.msg || 'salom')
+  res.send('✅ yuborildi')
 })
 
 app.listen(PORT, () =>
-  console.log('🌐 Web server ishlayapti:', PORT)
+  console.log('🌐 Web server port:', PORT)
 )
 
-// ====== SOZLAMALAR ======
+// ===== SOZLAMALAR =====
 const HOST = 'articraft.uz'
 const MC_PORT = 25565
 const USERNAME = 'RellixsAFK'
@@ -40,13 +37,16 @@ const RECONNECT_DELAY = 5000
 
 let bot
 let loggedIn = false
-let antiAfkTimer = null
+let antiAfkTimer
 let reconnecting = false
+let loginTries = 0
 
-// ====== BOT ======
+// ===== BOT START =====
 function startBot () {
   console.log('🔄 Bot ulanmoqda...')
   botStatus = '🔄 ulanmoqda'
+  loggedIn = false
+  loginTries = 0
 
   bot = mineflayer.createBot({
     host: HOST,
@@ -58,49 +58,93 @@ function startBot () {
   setupEvents()
 }
 
+// ===== EVENTS =====
 function setupEvents () {
   bot.once('spawn', () => {
     console.log('✅ Serverga kirdi')
-    botStatus = '🟡 login kutilmoqda'
-    loggedIn = false
+    botStatus = '🟡 tekshirilmoqda...'
+
+    // Agar server login so‘ramasa — majburan davom etamiz
+    setTimeout(forceContinueIfNoLogin, 6000)
   })
 
-  bot.on('message', (msg) => {
+  bot.on('message', msg => {
     const text = msg.toString()
     console.log('💬 CHAT:', text)
 
-    // LOGIN ANIQLASH (unicode OK)
-    if (!loggedIn && /login|\/l/i.test(text)) {
-      console.log('🔐 Login yuborildi')
-      bot.chat(`/login ${PASSWORD}`)
+    // 🔐 LOGIN ANIQLASH (unicode + oddiy)
+    if (!loggedIn && /login|ʟᴏɢɪɴ|\/l/i.test(text)) {
+      doLogin()
+    }
 
-      setTimeout(() => {
-        loggedIn = true
-        botStatus = '🟢 SMP → AFK'
-        bot.chat('/server smp')
-      }, 2000)
-
-      setTimeout(() => {
-        bot.chat('/warp afk')
-        startAntiAfk()
-      }, 4500)
+    // ✅ Login muvaffaqiyatli bo‘lsa (chat belgilariga qarab)
+    if (!loggedIn && /success|welcome|logged|kir/i.test(text)) {
+      loggedIn = true
+      afterLogin()
     }
   })
 
   bot.on('end', () => reconnect('end'))
-  bot.on('kicked', (r) => reconnect('kick'))
-  bot.on('error', (e) => console.log('⚠️', e.message))
+  bot.on('kicked', r => reconnect('kick'))
+  bot.on('error', e => console.log('⚠️', e.message))
 }
 
-// ====== RECONNECT ======
-function reconnect (why) {
-  console.log('🔁 Qayta ulanmoqda:', why)
-  botStatus = '🔁 qayta ulanmoqda'
-  loggedIn = false
-  stopAntiAfk()
+// ===== LOGIN =====
+function doLogin () {
+  if (loginTries >= 3) return
 
+  loginTries++
+  console.log('🔐 Login yuborildi', loginTries)
+  bot.chat(`/login ${PASSWORD}`)
+}
+
+// Agar login so‘ralmasa
+function forceContinueIfNoLogin () {
+  if (loggedIn) return
+
+  console.log('⚠️ Login so‘ralmadi → davom etyapman')
+  loggedIn = true
+  afterLogin()
+}
+
+// ===== LOGIN DAN KEYIN =====
+function afterLogin () {
+  botStatus = '🟢 SMP ga kiryapti'
+
+  setTimeout(() => bot.chat('/server smp'), 2000)
+  setTimeout(() => bot.chat('/warp afk'), 5000)
+  setTimeout(startAntiAfk, 7000)
+}
+
+// ===== ANTI AFK =====
+function startAntiAfk () {
+  clearInterval(antiAfkTimer)
+
+  antiAfkTimer = setInterval(() => {
+    const a = ['forward', 'left', 'right']
+    const act = a[Math.floor(Math.random() * a.length)]
+
+    bot.setControlState(act, true)
+    setTimeout(() => bot.setControlState(act, false), 1200)
+
+    bot.setControlState('jump', true)
+    setTimeout(() => bot.setControlState('jump', false), 300)
+
+    bot.look(Math.random() * Math.PI * 2, 0, true)
+  }, ANTI_AFK_INTERVAL)
+
+  botStatus = '🟢 AFK rejim'
+  console.log('🟢 Anti‑AFK yoqildi')
+}
+
+// ===== RECONNECT =====
+function reconnect (why) {
   if (reconnecting) return
   reconnecting = true
+
+  console.log('🔁 Qayta ulanmoqda:', why)
+  botStatus = '🔁 qayta ulanmoqda'
+  clearInterval(antiAfkTimer)
 
   setTimeout(() => {
     reconnecting = false
@@ -108,29 +152,5 @@ function reconnect (why) {
   }, RECONNECT_DELAY)
 }
 
-// ====== ANTI AFK ======
-function startAntiAfk () {
-  stopAntiAfk()
-  antiAfkTimer = setInterval(humanMove, ANTI_AFK_INTERVAL)
-  console.log('🟢 Anti‑AFK ishga tushdi')
-}
-
-function stopAntiAfk () {
-  if (antiAfkTimer) clearInterval(antiAfkTimer)
-}
-
-function humanMove () {
-  const actions = ['forward', 'left', 'right']
-  const action = actions[Math.floor(Math.random() * actions.length)]
-
-  bot.setControlState(action, true)
-  setTimeout(() => bot.setControlState(action, false), 1200)
-
-  bot.setControlState('jump', true)
-  setTimeout(() => bot.setControlState('jump', false), 300)
-
-  bot.look(Math.random() * Math.PI * 2, 0, true)
-}
-
-// ====== START ======
+// ===== START =====
 startBot()
