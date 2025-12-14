@@ -137,7 +137,6 @@ function startAntiAfk () {
   console.log('🟢 Anti‑AFK yoqildi')
 }
 
-// ===== RECONNECT =====
 function reconnect (why) {
   if (reconnecting) return
   reconnecting = true
