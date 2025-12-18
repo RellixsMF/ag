@@ -28,7 +28,7 @@ app.listen(PORT, () =>
 // ===== SOZLAMALAR =====
 const HOST = 'articraft.uz'
 const MC_PORT = 25565
-const USERNAME = '_ENDRUX_AFK_'
+const USERNAME = 'MENAFK'
 const VERSION = '1.21'
 const PASSWORD = '123456xD'
 
