@@ -1,7 +1,7 @@
 const mineflayer = require('mineflayer')
 const express = require('express')
 
-// ===== WEB (Render / UptimeRobot) =====
+
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -28,7 +28,7 @@ app.listen(PORT, () =>
 // ===== SOZLAMALAR =====
 const HOST = 'articraft.uz'
 const MC_PORT = 25565
-const USERNAME = 'Endrux_AFK'
+const USERNAME = '_ENDRUX_AFK_'
 const VERSION = '1.21'
 const PASSWORD = '123456xD'
 
