@@ -28,7 +28,7 @@ app.listen(PORT, () =>
 // ===== SOZLAMALAR =====
 const HOST = 'articraft.uz'
 const MC_PORT = 25565
-const USERNAME = 'RellixsAFK'
+const USERNAME = 'abuuuu'
 const VERSION = '1.21'
 const PASSWORD = '252356n1'
 
