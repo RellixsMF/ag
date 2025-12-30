@@ -28,9 +28,9 @@ app.listen(PORT, () =>
 // ===== SOZLAMALAR =====
 const HOST = 'articraft.uz'
 const MC_PORT = 25565
-const USERNAME = 'abuuuu'
+const USERNAME = 'sh_ssss_'
 const VERSION = '1.21'
-const PASSWORD = '252356n1'
+const PASSWORD = 'uwu111'
 
 const ANTI_AFK_INTERVAL = 3 * 60 * 1000
 const RECONNECT_DELAY = 5000
@@ -112,7 +112,7 @@ function afterLogin () {
   botStatus = '🟢 SMP ga kiryapti'
 
   setTimeout(() => bot.chat('/server smp'), 2000)
-  setTimeout(() => bot.chat('/warp afk'), 5000)
+  setTimeout(() => bot.chat('/team home'), 5000)
   setTimeout(startAntiAfk, 7000)
 }
 
