@@ -151,5 +151,4 @@ function reconnect (why) {
   }, RECONNECT_DELAY)
 }
 
-// ===== START =====
 startBot()
