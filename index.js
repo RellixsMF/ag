@@ -26,11 +26,11 @@ app.listen(PORT, () =>
 )
 
 // ===== SOZLAMALAR =====
-const HOST = 'articraft.uz'
-const MC_PORT = 25565
-const USERNAME = 'abuuuu'
+const HOST = 'barq.aternos.me'
+const MC_PORT = 25332
+const USERNAME = 'Marlowww'
 const VERSION = '1.21'
-const PASSWORD = '252356n1'
+const PASSWORD = 'gugugugaga'
 
 const ANTI_AFK_INTERVAL = 3 * 60 * 1000
 const RECONNECT_DELAY = 5000
